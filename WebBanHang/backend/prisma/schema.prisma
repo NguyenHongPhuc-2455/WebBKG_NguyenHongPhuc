@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.NVarChar(100)
+  email        String   @unique @db.NVarChar(255)
+  passwordHash String   @db.NVarChar(255)
+  role         String   @default("Customer") @db.NVarChar(50) // "Admin" or "Customer"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("Users")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.NVarChar(100)
+  slug      String    @unique @db.VarChar(100)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("Categories")
+}
+
+model Product {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.NVarChar(255)
+  description String?        @db.NVarChar(Max)
+  price       Decimal        @db.Decimal(18, 2)
+  stock       Int            @default(0)
+  categoryId  Int
+  category    Category       @relation(fields: [categoryId], references: [id])
+  images      ProductImage[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("Products")
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageUrl  String   @db.NVarChar(Max)
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("ProductImages")
+}
